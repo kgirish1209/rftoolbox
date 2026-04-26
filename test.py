@@ -18,9 +18,9 @@ import rfutil as rfutil
 # SIGNAL PARAMETERS - Single Tone Configuration
 # ============================================================================
 # Define single-tone signal (for testing/verification purposes)
-amplitude = list(np.ones(1))  # Single tone with amplitude = 1 V
-phase = list(np.zeros(1))  # Phase = 0 radians
-frequency = list([15000])  # Single tone at 15 kHz
+amplitude = list(np.ones(10))  # Single tone with amplitude = 1 V
+phase = list(np.zeros(10))  # Phase = 0 radians
+frequency = list(np.linspace(15000,150000,10,endpoint=False))  # Frequencies from 15 kHz to 150 kHz (10 tones)
 
 # ============================================================================
 # SAMPLING CONFIGURATION
@@ -49,3 +49,7 @@ ipsignal.plotSignal("Input Signal","time","Amplitude",plt)  # Plot waveform
 signal_power_watts = rfutil.getSignalPower(ipsignal.sig)[0]  # Power in Watts
 signal_power_dbm = rfutil.getLintodBM(signal_power_watts)  # Convert to dBm
 print("Time domain power of the signal is ",signal_power_dbm)
+
+filteredSignal = rfutil.lowPassFilter(ipsignal.sig, 10*frequency[0], samplingFreq, 1000)  # Bandpass filter around 15 kHz with 1 kHz bandwidth
+rfutil.plotSignal(timewindow, filteredSignal, "Filtered Signal (15 kHz)", "Time (s)", "Amplitude", plt)
+plt.show()  # Uncomment to display plot

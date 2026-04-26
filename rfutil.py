@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 # ============================================================================
 # CONSTANTS
 # ============================================================================
-RefR = 50  # Reference impedance in ohms (standard RF impedance)
+RefR = 1  # Reference impedance in ohms (standard RF impedance)
 
 # ============================================================================
 # PLOTTING FUNCTIONS
@@ -223,3 +223,58 @@ def getPowerOfFreqFromFFT(fftFreq,amplitudeSpectrum,freqOfInterest):
     indexOfFreqOfInterest = np.argmin(np.abs(fftFreq-freqOfInterest))  # Find nearest bin
     powerOfFreqOfInterest = 2*(amplitudeSpectrum[indexOfFreqOfInterest]**2)/((len(amplitudeSpectrum)**2)*RefR)  # Power in Watts
     return powerOfFreqOfInterest
+
+def getRectangularPulse(numSamples):
+    return np.ones(numSamples)
+
+def addAWGNNoise(signal, snr_db):
+    
+    signal_power = getSignalPower(signal)[0]  # Power of the input signal in Watts
+    snr_linear = 10**(snr_db/10)  # Convert SNR from dB to linear scale
+    noise_power = signal_power / snr_linear  # Calculate noise power in Watts
+    if(np.iscomplexobj(signal)):
+        print("Signal is complex, generating complex noise")
+        noise_std_dev = math.sqrt(noise_power*RefR/2)  # Standard deviation of noise (assuming Gaussian)
+        noise = (np.random.normal(0, noise_std_dev, len(signal)) +1j*np.random.normal(0, noise_std_dev, len(signal)) ) # Generate AWGN noise
+    else:
+        print("Signal is real, generating real noise")
+        noise_std_dev = math.sqrt(noise_power*RefR)  # Standard deviation of noise (assuming Gaussian)
+        noise = np.random.normal(0, noise_std_dev, len(signal))  # Generate AWGN noise for real signals s
+    #print("Power of noise added in dBm: ", getLintodBM(noise_power), "dBm")  # Print noise power in dBm
+    noisy_signal = signal + noise  # Add noise to original signal
+    #print("Total power of noisy signal in dBm: ", getLintodBM(getSignalPower(noisy_signal)[0]), "dBm")  # Print total power of noisy signal
+    return noisy_signal
+
+def lowPassFilterCoeff(cutoff_hz, fs_hz, num_taps=101):
+    # 1. Normalize the cutoff frequency (0.5 is Nyquist)
+    f_n = cutoff_hz / fs_hz
+    
+    # 2. Create the time index (centered at zero)
+    n = np.arange(num_taps) - (num_taps - 1) / 2
+    
+    # 3. Generate the Sinc function
+    # Note: Handle the division by zero at n=0 using np.sinc
+    # np.sinc(x) in numpy is sin(pi*x)/(pi*x)
+    h = np.sinc(2 * f_n * n)
+    
+    # 4. Apply a window function (Hamming window) to reduce ripples
+    window = np.hamming(num_taps)
+    h = h * window
+    
+    # 5. Normalize the filter coefficients for unity gain at DC
+    h = h / np.sum(h)
+    
+    return h
+
+def lowPassFilter(signal, cutoff_hz, fs_hz, num_taps=101):
+    coeffs = lowPassFilterCoeff(cutoff_hz, fs_hz, num_taps)
+    coeffs = coeffs / np.sum(coeffs)  # Normalize coefficients to ensure unity gain at DC
+    filtered_signal = np.convolve(signal, coeffs, mode='same')  # Convolve signal with filter coefficients
+    return filtered_signal
+
+def matchedFilter(signal, pulse):
+    # The matched filter is the time-reversed version of the pulse
+    h_matched = pulse[::-1]  # Time-reverse the pulse to create matched filter coefficients
+    output = np.convolve(signal, h_matched, mode='full')  # Convolve input signal with matched filter
+    peak_val = np.max(output)  # Find the peak value of the output
+    return output, peak_val
