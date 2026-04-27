@@ -46,6 +46,81 @@ $$SNR_{sample} (dB) = \frac{E_b}{N_0} (dB) - 10 \log_{10}\left(\frac{f_s}{R_b}\r
 ### Receiver Design
 The receiver utilizes a product demodulator followed by a Matched Filter. Note that while a Low Pass Filter (LPF) is often used after downconversion, this implementation relies on the Matched Filter to act as the optimal filter, preventing the distortion of rectangular pulses that narrow-band LPFs might cause.
 
+## API Reference
+
+### `qpskTransreceiver.py`
+
+- **`getQPSKModulatedSignal(symbol, ipPulseShape, LOFrequency, samplingFreq, transmitedPowerOfSymbol_dbM)`**
+  - `symbol`: Complex QPSK symbol (e.g., $1+1j$).
+  - `ipPulseShape`: Array defining the pulse shape (e.g., rectangular).
+  - `LOFrequency`: Carrier frequency in Hz.
+  - `samplingFreq`: Simulation sampling rate in Hz.
+  - `transmitedPowerOfSymbol_dbM`: Target transmit power in dBm.
+  - *Returns*: Tuple of (Passband signal, Baseband signal).
+
+- **`getQPSKDemodulatedSignal(receivedSignalPassBandNoisy, inPhaseSymbolRate, LOFrequency, samplingFreq)`**
+  - `receivedSignalPassBandNoisy`: The raw noisy signal from the channel.
+  - `inPhaseSymbolRate`: The rate of symbols (used for filtering context).
+  - `LOFrequency`: Local Oscillator frequency for downconversion.
+  - `samplingFreq`: Simulation sampling rate.
+  - *Returns*: Tuple of (I component, Q component).
+
+- **`getmatchedFilterOutput(ipSignal, ipPulseShape)`**
+  - `ipSignal`: Input baseband signal component.
+  - `ipPulseShape`: The pulse shape used at the transmitter.
+  - *Returns*: Filtered signal maximized for SNR at the sampling point.
+
+- **`getDecidedSymbols(rawIQSamples)`**
+  - `rawIQSamples`: Complex samples after matched filtering.
+  - *Returns*: Hard-decision complex symbols mapped to the QPSK constellation.
+
+### `channelModeling.py`
+
+- **`channelModel(transmittedSignalPassBand, snr_db, channelType="AWGN")`**
+  - `transmittedSignalPassBand`: The signal to transmit.
+  - `snr_db`: Target per-sample Signal-to-Noise Ratio.
+  - `channelType`: Default is "AWGN".
+  - *Returns*: Noisy signal array.
+
+### `rfutil.py`
+
+- **`getRectangularPulse(numOfSamplesPerSymbol)`**
+  - `numOfSamplesPerSymbol`: Integer count of samples for one symbol duration.
+  - *Returns*: An array of ones representing a rectangular pulse.
+
+- **`getSignalPower(signal)`**
+  - `signal`: Input signal array.
+  - *Returns*: Average power of the signal in Watts.
+
+- **`getLintodBM(powerWatts)`**
+  - `powerWatts`: Linear power value.
+  - *Returns*: Power value in dBm.
+
+- **`powerScale(signal, targetPowerDBM)`**
+  - `signal`: Input signal array.
+  - `targetPowerDBM`: Desired power level.
+  - *Returns*: Scaled signal array.
+
+### `modulationUtil.py`
+
+- **`getSymbolMapping(bits, scheme)`**
+  - `bits`: Array of bits to map.
+  - `scheme`: Modulation scheme string (e.g., 'QPSK').
+  - *Returns*: Complex symbol.
+
+- **`getSymbolDemapping(symbols, scheme)`**
+  - `symbols`: Array of complex symbols.
+  - `scheme`: Modulation scheme string.
+  - *Returns*: Array of recovered bits.
+
+- **`plotConstellation(real, imag, scheme, plt)`**
+  - Utility for plotting IQ samples against a target constellation grid.
+
+### `rfwaveform.py`
+
+- **`plotSignal(time, signal, title, x_label, y_label, plt)`**
+  - Standardized utility for visualizing time-domain waveforms with appropriate labeling.
+
 ## Usage
 
 To run the simulation and see the BER and constellation results:
@@ -62,4 +137,4 @@ python rftoolbox/qpskSimulation.py
 ## Author
 
 Girish Kakalwar
-Version: 0.1.0
+Version: 0.1.1

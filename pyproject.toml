@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "casp-rf-toolbox"
-version = "0.1.0"
+version = "0.1.1"
 description = "RF Signal Processing Utility and QPSK Simulation Toolbox"
 readme = "README.md"
 requires-python = ">=3.8"
