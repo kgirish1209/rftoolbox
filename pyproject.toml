@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "casp-rf-toolbox"
+version = "0.1.0"
+description = "RF Signal Processing Utility and QPSK Simulation Toolbox"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    { name = "Girish Kakalwar" },
+]
+dependencies = [
+    "numpy",
+    "matplotlib",
+]
+
+[tool.setuptools]
+packages = ["rftoolbox"]
