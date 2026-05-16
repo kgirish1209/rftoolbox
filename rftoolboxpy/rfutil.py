@@ -198,8 +198,8 @@ def powerScale(ipsignal,target_power_dbm):
 #   - phase_spectrum: Phase of FFT (radians, -π to π)
 # ============================================================================
 def getFFTOfSignal(signal,samplingFreq,Nfft):
-        fftsig = np.fft.fft(signal,Nfft)  # Compute FFT
-        frequency = np.fft.fftfreq(Nfft,1/samplingFreq)  # Generate frequency bins
+        fftsig = np.fft.fft(signal,int(Nfft))  # Compute FFT
+        frequency = np.fft.fftfreq(int(Nfft),1/samplingFreq)  # Generate frequency bins
         amplitudeSpectrum = np.abs(fftsig)  # Extract magnitude (linear)
         phaseSpectrum = np.angle(fftsig)  # Extract phase (radians)
         return [frequency,fftsig,amplitudeSpectrum,phaseSpectrum]

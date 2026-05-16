@@ -49,3 +49,21 @@ def getAWGNNoise(signal, noise_power):
         noise_std_dev = math.sqrt(noise_power*rfutil.RefR)  # Standard deviation of noise (assuming Gaussian)
         noise = np.random.normal(0, noise_std_dev, len(signal))  # Generate AWGN noise for real signals
     return noise
+
+# ============================================================================
+# FUNCTION: getAWGNNoise
+# Purpose: Generates Additive White Gaussian Noise (AWGN) with a specified power.
+#          Handles both real and complex signals.
+# Parameters:
+#   - noise_power: The desired power of the generated noise in Watts.
+#.  - numSamples : Number of Samples
+#.  - isComplex : Noise type.
+# Returns: noise - An array of AWGN samples (complex if signal is complex, real otherwise).
+def getAWGNNoiseVector(noisePower, numSamples, isComplex=False):
+    if(isComplex == True):
+        noise_std_dev = math.sqrt(noisePower*rfutil.RefR/2)  # Standard deviation of noise (assuming Gaussian)
+        noise = (np.random.normal(0, noise_std_dev, numSamples) +1j*np.random.normal(0, noise_std_dev, numSamples) ) # Generate AWGN noise
+    else:
+        noise_std_dev = math.sqrt(noisePower*rfutil.RefR)  # Standard deviation of noise (assuming Gaussian)
+        noise = np.random.normal(0, noise_std_dev, numSamples)  # Generate AWGN noise for real signals
+    return noise
